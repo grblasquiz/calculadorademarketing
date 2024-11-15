@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Marketing</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Estilos básicos */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        /* Estilos para el contenedor */
+        .container {
+            width: 90%;
+            max-width: 600px;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        /* Modo Oscuro */
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        .dark-mode .container {
+            background: #1e1e1e;
+            color: #e0e0e0;
+        }
+        .dark-mode .tab {
+            background: #2b2b2b;
+            color: #b0b0b0;
+        }
+        .dark-mode .tab.active {
+            background: #4e73df;
+            color: #ffffff;
+        }
+        .dark-mode button {
+            background-color: #4e73df;
+            color: #ffffff;
+        }
+        .dark-mode input {
+            background-color: #2b2b2b;
+            color: #e0e0e0;
+            border: 1px solid #667;
+        }
+        .dark-mode .help-section {
+            background-color: #333;
+            color: #e0e0e0;
+        }
+
+        /* Interruptor de Modo Oscuro */
+        .dark-mode-toggle {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+        .dark-mode-toggle label {
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        /* Estilos de pestañas con íconos */
+        .tabs {
+            display: flex;
+            cursor: pointer;
+            margin-bottom: 10px;
+            position: relative;
+            border-bottom: 2px solid #ddd;
+            flex-wrap: wrap;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            background: #f1f1f1;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+            min-width: 100px;
+            font-weight: bold;
+            color: #667;
+        }
+        .tab:hover {
+            background: #e0e0e0;
+        }
+        .tab.active {
+            background: #4e73df;
+            color: white;
+            position: relative;
+        }
+        .tab.active::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #4e73df;
+            border-radius: 2px;
+        }
+
+        /* Estilos de contenido de pestañas */
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f9f9f9;
+            transition: opacity 0.3s ease;
+        }
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        /* Botones */
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #4e73df;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        button:hover {
+            background-color: #3a5bb3;
+            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Campos de entrada */
+        input[type="number"] {
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        input[type="number"]:focus {
+            border-color: #4e73df;
+            box-shadow: 0 0 8px rgba(78, 115, 223, 0.3);
+            outline: none;
+        }
+
+        /* Errores de validación */
+        small {
+            color: red;
+            display: none;
+            font-weight: bold;
+        }
+
+        /* Estilos de Guía de Uso */
+        .help-section {
+            margin: 15px 0;
+            background-color: #e8f0fe;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+            font-size: 14px;
+            color: #333;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .dark-mode .help-section {
+            background-color: #333;
+            color: #ddd;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Interruptor de Modo Oscuro -->
+        <div class="dark-mode-toggle">
+            <label>
+                <input type="checkbox" onclick="toggleDarkMode()"> Modo Oscuro
+            </label>
+        </div>
+
+        <h1>Calculadora de Marketing</h1>
+
+        <!-- Botón de Guía de Uso -->
+        <button onclick="toggleHelpSection()">¿Cómo funciona?</button>
+        <div class="help-section" id="helpSection">
+            <p>Esta calculadora te ayuda a calcular métricas de marketing importantes:</p>
+            <ul>
+                <li><strong>CTR:</strong> Tasa de clics sobre impresiones.</li>
+                <li><strong>Tasa de Conversión:</strong> Porcentaje de conversiones sobre clics.</li>
+                <li><strong>Comparar Conversiones:</strong> Compara conversiones entre dos meses.</li>
+                <li><strong>ROI:</strong> Retorno sobre inversión.</li>
+                <li><strong>CPA, CPC, CPM:</strong> Costos por adquisición, clic e impresiones, respectivamente.</li>
+            </ul>
+        </div>
+        
+        <!-- Pestañas con íconos -->
+        <div class="tabs">
+            <div class="tab active" onclick="openTab('ctr')"><i class="fas fa-mouse-pointer"></i>Calcular CTR</div>
+            <div class="tab" onclick="openTab('conversion')"><i class="fas fa-percentage"></i>Calcular Tasa de Conversión</div>
+            <div class="tab" onclick="openTab('comparison')"><i class="fas fa-chart-line"></i>Comparar Conversiones</div>
+            <div class="tab" onclick="openTab('roi')"><i class="fas fa-dollar-sign"></i>Calcular ROI</div>
+            <div class="tab" onclick="openTab('cpa')"><i class="fas fa-dollar-sign"></i>Calcular CPA</div>
+            <div class="tab" onclick="openTab('cpc')"><i class="fas fa-mouse-pointer"></i>Calcular CPC</div>
+            <div class="tab" onclick="openTab('cpm')"><i class="fas fa-bullhorn"></i>Calcular CPM</div>
+        </div>
+
+        <!-- Contenido de cada pestaña -->
+        <div id="ctr" class="tab-content active">
+            <h2>Cálculo de CTR</h2>
+            <label for="clicks">Clics:</label>
+            <input type="number" id="clicks" placeholder="Ingrese el número de clics" oninput="validateInput(this)">
+            <small id="clicksError">Ingrese un número positivo</small>
+            <br><br>
+            <label for="impressions">Impresiones:</label>
+            <input type="number" id="impressions" placeholder="Ingrese el número de impresiones" oninput="validateInput(this)">
+            <small id="impressionsError">Ingrese un número positivo</small>
+            <br><br>
+            <button onclick="calculateCTR()">Calcular CTR</button>
+            <p id="ctrResult"></p>
+        </div>
+
+        <div id="conversion" class="tab-content">
+            <h2>Cálculo de Tasa de Conversión</h2>
+            <label for="conversionClicks">Clics:</label>
+            <input type="number" id="conversionClicks" placeholder="Ingrese el número de clics" oninput="validateInput(this)">
+            <small id="conversionClicksError">Ingrese un número positivo</small>
+            <br><br>
+            <label for="conversions">Conversiones:</label>
+            <input type="number" id="conversions" placeholder="Ingrese el número de conversiones" oninput="validateInput(this)">
+            <small id="conversionsError">Ingrese un número positivo</small>
+            <br><br>
+            <button onclick="calculateConversionRate()">Calcular Tasa de Conversión</button>
+            <p id="conversionResult"></p>
+        </div>
+
+        <div id="comparison" class="tab-content">
+            <h2>Comparación de Conversiones Mensuales</h2>
+            <label for="month1">Conversiones Mes 1:</label>
+            <input type="number" id="month1" placeholder="Ingrese las conversiones del primer mes" oninput="validateInput(this)">
+            <small id="month1Error">Ingrese un número positivo</small>
+            <br><br>
+            <label for="month2">Conversiones Mes 2:</label>
+            <input type="number" id="month2" placeholder="Ingrese las conversiones del segundo mes" oninput="validateInput(this)">
+            <small id="month2Error">Ingrese un número positivo</small>
+            <br><br>
+            <button onclick="compareConversions()">Comparar Conversiones</button>
+            <p id="comparisonResult"></p>
+            <canvas id="conversionChart" width="400" height="200" style="margin-top: 20px;"></canvas>
+        </div>
+
+        <div id="roi" class="tab-content">
+            <h2>Cálculo de ROI</h2>
+            <label for="revenue">Ingresos:</label>
+            <input type="number" id="revenue" placeholder="Ingrese los ingresos" oninput="validateInput(this)">
+            <small id="revenueError">Ingrese un número positivo</small>
+            <br><br>
+            <label for="investment">Inversión:</label>
+            <input type="number" id="investment" placeholder="Ingrese la inversión" oninput="validateInput(this)">
+            <small id="investmentError">Ingrese un número positivo</small>
+            <br><br>
+            <button onclick="calculateROI()">Calcular ROI</button>
+            <p id="roiResult"></p>
+            <p id="profitResult"></p>
+        </div>
+
+        <div id="cpa" class="tab-content">
+            <h2>Cálculo de CPA</h2>
+            <label for="investmentCPA">Inversión Total:</label>
+            <input type="number" id="investmentCPA" placeholder="Ingrese la inversión total" oninput="validateInput(this)">
+            <small id="investmentCPAError">Ingrese un número positivo</small>
+            <br><br>
+            <label for="conversionsCPA">Conversiones:</label>
+            <input type="number" id="conversionsCPA" placeholder="Ingrese el número de conversiones" oninput="validateInput(this)">
+            <small id="conversionsCPAError">Ingrese un número positivo</small>
+            <br><br>
+            <button onclick="calculateCPA()">Calcular CPA</button>
+            <p id="cpaResult"></p>
+        </div>
+
+        <div id="cpc" class="tab-content">
+            <h2>Cálculo de CPC</h2>
+            <label for="investmentCPC">Inversión Total:</label>
+            <input type="number" id="investmentCPC" placeholder="Ingrese la inversión total" oninput="validateInput(this)">
+            <small id="investmentCPCError">Ingrese un número positivo</small>
+            <br><br>
+            <label for="clicksCPC">Clics:</label>
+            <input type="number" id="clicksCPC" placeholder="Ingrese el número de clics" oninput="validateInput(this)">
+            <small id="clicksCPCError">Ingrese un número positivo</small>
+            <br><br>
+            <button onclick="calculateCPC()">Calcular CPC</button>
+            <p id="cpcResult"></p>
+        </div>
+
+        <div id="cpm" class="tab-content">
+            <h2>Cálculo de CPM</h2>
+            <label for="investmentCPM">Inversión Total:</label>
+            <input type="number" id="investmentCPM" placeholder="Ingrese la inversión total" oninput="validateInput(this)">
+            <small id="investmentCPMError">Ingrese un número positivo</small>
+            <br><br>
+            <label for="impressionsCPM">Impresiones:</label>
+            <input type="number" id="impressionsCPM" placeholder="Ingrese el número de impresiones" oninput="validateInput(this)">
+            <small id="impressionsCPMError">Ingrese un número positivo</small>
+            <br><br>
+            <button onclick="calculateCPM()">Calcular CPM</button>
+            <p id="cpmResult"></p>
+        </div>
+    </div>
+
+    <script>
+        // Función para cambiar entre pestañas
+        function openTab(tabId) {
+            let tabs = document.querySelectorAll('.tab');
+            let contents = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            document.querySelector(`.tab[onclick="openTab('${tabId}')"]`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // Función de modo oscuro
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+
+        // Mostrar/ocultar guía de uso
+        function toggleHelpSection() {
+            const helpSection = document.getElementById('helpSection');
+            helpSection.style.display = helpSection.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Validación de entrada en tiempo real
+        function validateInput(input) {
+            const errorField = document.getElementById(input.id + "Error");
+            if (input.value === "" || input.value <= 0) {
+                errorField.style.display = "block";
+                input.style.borderColor = "red";
+                errorField.textContent = "Por favor, ingrese un número positivo";
+            } else {
+                errorField.style.display = "none";
+                input.style.borderColor = "";
+            }
+        }
+
+        // Función de ejemplo para calcular CTR
+        function calculateCTR() {
+            let clicks = parseFloat(document.getElementById('clicks').value);
+            let impressions = parseFloat(document.getElementById('impressions').value);
+            if (clicks && impressions && impressions > 0) {
+                let ctr = (clicks / impressions) * 100;
+                document.getElementById('ctrResult').innerText = 'El CTR es: ' + ctr.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
+            }
+        }
+
+        function calculateConversionRate() {
+            let clicks = parseFloat(document.getElementById('conversionClicks').value);
+            let conversions = parseFloat(document.getElementById('conversions').value);
+            if (conversions && clicks && clicks > 0) {
+                let conversionRate = (conversions / clicks) * 100;
+                document.getElementById('conversionResult').innerText = 'La tasa de conversión es: ' + conversionRate.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
+            }
+        }
+
+        function compareConversions() {
+            let month1 = parseFloat(document.getElementById('month1').value);
+            let month2 = parseFloat(document.getElementById('month2').value);
+            if (month1 && month2) {
+                let difference = month2 - month1;
+                let percentageChange = (difference / month1) * 100;
+                document.getElementById('comparisonResult').innerHTML = `Diferencia: ${difference.toLocaleString("es-AR")} <br> Cambio porcentual: ${percentageChange.toLocaleString("es-AR", {minimumFractionDigits: 2, maximumFractionDigits: 2})}%`;
+                renderConversionChart(month1, month2);
+            }
+        }
+
+        function calculateROI() {
+            let revenue = parseFloat(document.getElementById('revenue').value);
+            let investment = parseFloat(document.getElementById('investment').value);
+            if (revenue && investment && investment > 0) {
+                let profit = revenue - investment;
+                let roi = (profit / investment) * 100;
+                document.getElementById('roiResult').innerText = 'El ROI es: ' + roi.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
+                document.getElementById('profitResult').innerText = 'Ganancia Total: $' + profit.toLocaleString("es-AR");
+            }
+        }
+
+        function calculateCPA() {
+            let investment = parseFloat(document.getElementById('investmentCPA').value);
+            let conversions = parseFloat(document.getElementById('conversionsCPA').value);
+            if (investment && conversions && conversions > 0) {
+                let cpa = investment / conversions;
+                document.getElementById('cpaResult').innerText = 'El CPA es: $' + cpa.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+        }
+
+        function calculateCPC() {
+            let investment = parseFloat(document.getElementById('investmentCPC').value);
+            let clicks = parseFloat(document.getElementById('clicksCPC').value);
+            if (investment && clicks && clicks > 0) {
+                let cpc = investment / clicks;
+                document.getElementById('cpcResult').innerText = 'El CPC es: $' + cpc.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+        }
+
+        function calculateCPM() {
+            let investment = parseFloat(document.getElementById('investmentCPM').value);
+            let impressions = parseFloat(document.getElementById('impressionsCPM').value);
+            if (investment && impressions && impressions > 0) {
+                let cpm = (investment / impressions) * 1000;
+                document.getElementById('cpmResult').innerText = 'El CPM es: $' + cpm.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+        }
+
+        // Gráfico para Comparar Conversiones
+        function renderConversionChart(month1, month2) {
+            const ctx = document.getElementById('conversionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Mes 1', 'Mes 2'],
+                    datasets: [{
+                        label: 'Conversiones',
+                        data: [month1, month2],
+                        backgroundColor: ['#4e73df', '#1cc88a'],
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>
